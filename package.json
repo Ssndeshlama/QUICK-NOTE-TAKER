@@ -1,0 +1,15 @@
+{
+  "name": "quick-note-taker",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^28.3.3"
+  },
+  "type": "commonjs"
+}
