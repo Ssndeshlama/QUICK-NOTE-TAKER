@@ -3,6 +3,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     const saveBtn = document.getElementById('save');
     const statusEl = document.getElementById('save_status');
     const saveAsBtn = document.getElementById('save-as');
+    const newNoteBtn = document.getElementById('new-note');
+    const openFileBtn = document.getElementById('open-file');
 
     // Load saved note on startup
     const savedNote = await window.electronAPI.loadNote();
@@ -31,6 +33,35 @@ window.addEventListener('DOMContentLoaded', async () => {
             statusEl.textContent = `Saved to: ${result.filePath}`;
         } else {
             statusEl.textContent = 'Save As cancelled';
+        }
+    });
+    newNoteBtn.addEventListener('click', async ()=>{
+        if (textarea.value === lastSavedText){
+            textarea.value= '';
+            lastSavedText = '';
+            statusEl.textContent = 'New note started.';
+            return;
+        }
+
+        const result = await window.electronAPI.newNote();
+        if (result.confirmed){
+            textarea.value =  '';
+            lastSavedText = '';
+            statusEl.textContent = 'New note started';
+        }else {
+            statusEl.textContent = 'New note canceled.';
+        }
+    });
+
+    openFileBtn.addEventListener('click', async ()=>{
+        const result = await window.electronAPI.openFile();
+        if (result.success){
+            textarea.value = result.content;
+            lastSavedText = result.content;
+            currentFilePath = result.filePath;
+            statusEl.textContent = `Opened: ${result.filePath}`;
+        }else{
+            statusEl.textContent= 'Open canceled';
         }
     });
 
