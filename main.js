@@ -1,4 +1,4 @@
-const{ app,BrowserWindow, ipcMain ,dialog} = require('electron');
+const{ app,BrowserWindow, ipcMain ,dialog,Menu} = require('electron');
 app.disableHardwareAcceleration();
 
 const path = require('node:path');
@@ -82,4 +82,9 @@ ipcMain.handle('open-file', async (event) => {
     const filePath = result.filePaths[0];
     const content  = fs.readFileSync(filePath, 'utf-8');
     return {success: true, content, filePath };
+});
+
+ipcMain.handle('smart-save',async(event, text, filePath) => {
+    const targetPath = filePath || path.join(app.getPath('documents'), 'quicknote.txt');
+    fs.writeFileSync(targetPath, text, 'utf-8');
 });

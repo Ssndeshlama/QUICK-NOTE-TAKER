@@ -17,19 +17,20 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Manual Save
     saveBtn.addEventListener('click', async () => {
         try {
-            await window.electronAPI.saveNote(textarea.value);
-            alert('Note Saved Successfully!!!');
-            if (statusEl) statusEl.textContent = 'Manually Saved!';
-            lastSavedText = textarea.value;
+           const result = await window.electronAPI.smartSave(textarea.value, currentFilePath);
+           lastSavedText = textarea.value;
+           currentFilePath = result.filePath;
+           statusEl.textContent = `Saved to: ${result.filePath}`;
         } catch (err) {
-            console.error('Manual save failed!!', err);
-            if (statusEl) statusEl.textContent = 'Save Failed - check console';
+            console.error('Save Failed: ', err);
+            statusEl.textContent = 'Save Failed!!!';
         }
     });
     saveAsBtn.addEventListener('click', async () => {
         const result = await window.electronAPI.saveAs(textarea.value);
         if (result.success) {
             lastSavedText = textarea.value;
+            currentFilePath= result.filePath;
             statusEl.textContent = `Saved to: ${result.filePath}`;
         } else {
             statusEl.textContent = 'Save As cancelled';
