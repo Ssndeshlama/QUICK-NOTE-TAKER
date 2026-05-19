@@ -5,6 +5,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const saveAsBtn = document.getElementById('save-as');
     const newNoteBtn = document.getElementById('new-note');
     const openFileBtn = document.getElementById('open-file');
+    const deleteBtn = document.getElementById('deleteBtn');
 
     // Load saved note on startup
     const savedNote = await window.electronAPI.loadNote();
@@ -66,6 +67,24 @@ window.addEventListener('DOMContentLoaded', async () => {
             statusEl.textContent= 'Open canceled';
         }
     });
+
+    deleteBtn.addEventListener('click', async () => {
+    if (confirm('Really delete ALL notes? This cannot be undone!')) {
+        try {
+            await window.electronAPI.deleteNote();
+
+            textarea.value = ''; // clear the text area
+            lastSavedText = '';
+
+            statusEl.textContent = 'All notes deleted!';
+            statusEl.style.color = 'red';
+
+        } catch (err) {
+            alert('Delete failed!');
+
+        }
+    }
+});
 
 
     // Auto Save function

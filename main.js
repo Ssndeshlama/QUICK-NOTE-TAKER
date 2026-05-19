@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu , Tray} = require('electron');
 app.disableHardwareAcceleration();
 
 const path = require('node:path');
@@ -17,6 +17,11 @@ function createWindow() {
     });
 
     win.loadFile('index.html');
+
+    win.on('close', (event) => {
+       event.preventDefault();
+       win.hide(); 
+    });
 }
 
 app.whenReady().then(() => {
@@ -28,7 +33,7 @@ app.whenReady().then(() => {
             submenu: [
                 {
                     label: 'New Note',
-                    acclerator: 'CmdOrCtrl+N',
+                    accelerator: 'CmdOrCtrl+N',
                     click: () => {
                         BrowserWindow.getFocusedWindow().webContents.send('menu-new-note');
                     }
@@ -64,12 +69,45 @@ app.whenReady().then(() => {
                 }
             ]
         }
+
     ];
+
+    let tray = null;
+    app.whenReady().then(() => {
+        createWindow();
+        // ... menu setup code ...
+        // Create tray icon ...
+        tray = new Tray(path.join(__dirname, 'tray-icon.png'));
+        //Tray context menu 
+        const trayMenu = Menu.buildFromTemplate([
+            {
+                label : 'Show App',
+                click: () => {
+                    BrowserWindow.getAllWindows()[0].show();
+                }
+            },
+            {
+                label : 'Quit',
+                click: () => app.quit()
+            }
+        ]);
+        tray.setToolTip('Quick Note Taker');
+        tray.setContextMenu(trayMenu);
+    });
     const menu = Menu.buildFromTemplate(menuTemplate);
     Menu.setApplicationMenu(menu);
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    });
+
+    tray.on('double-click',() => {
+        const win = BrowserWindow.getAllWindows()[0];
+        if (win.isVisible()){
+            win.hide();
+        } else {
+            win.show();
+        }
     });
 });
 
@@ -135,3 +173,14 @@ ipcMain.handle('smart-save', async (event, text, filePath) => {
     fs.writeFileSync(targetPath, text, 'utf-8');
     return { success: true, filePath: targetPath };
 });
+
+ipcMain.handle('delete-note', async ()=> {
+    const filePath = path.join(app.getPath('documents'), 'quicknote.txt');
+    if (fs.existsSync(filePath)){
+        fs.unlinkSync(filePath);
+    }
+    return { success: true};
+
+});
+
+
